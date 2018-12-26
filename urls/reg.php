@@ -30,7 +30,7 @@
 	if($count_login == 0){
 		if($count_email == 0){
 			$hash_password = password_hash($password, PASSWORD_BCRYPT);
-			$query = "INSERT INTO users VALUES (NULL, '$name', '$login', '$hash_password', '$email')";
+			$query = "INSERT INTO users VALUES (NULL, '$name', '$login', '$hash_password', '$email', 1)";
 			$result = mysqli_query($connect, $query);
 			if ($result) {
 				$status_code = "HTTP/1.0 200 OK";
