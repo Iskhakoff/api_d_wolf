@@ -88,9 +88,12 @@
             echo $jsonResult;
         }
         case 'answer': {  $status_code = "HTTP/1.0 200 OK";
-            $status = [
-                "words" => $request
-            ];
+
+            if(store_user_answers($request['dictionary_id'], $request['user_id'], $request['answers'])) {
+                $status = [
+                    "status"=>"success"
+                ];
+            }
 
             header('Content-Type: application/json');
             header($status_code);

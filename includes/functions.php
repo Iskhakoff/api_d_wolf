@@ -245,8 +245,101 @@
         }
     }
 
-    function store_user_answers($did, $uid, $answers) {}
+    function store_user_answers($did, $uid, $answers) {
+        global $connect;
+
+        foreach ($answers as $key=>$answer) {
+
+            $insert = [];
+            $update = [];
+            $exists = user_word_answer_exists($uid, $answer['word_id']);
+
+
+            if(count($exists)> 0) {
+                $exists = $exists[0];
+                if($answer['answered'] == 'true') {
+                    $count = (int)$exists['count'] + 1;
+                } else {
+                    $count = $exists['count'];
+                }
+                $update[] = "count={$count}";
+
+                if($count >= 5) {
+                    $answered = true;
+
+                    $update[] = "answerd={$answered}";
+                }
+                $updated = implode(',', $update);
+
+                $query = "UPDATE user_answers SET {$updated} WHERE word_id={$answer['word_id']} AND user_id={$uid}";
+
+                if(!mysqli_query($connect, $query)) return ['code'=>500, 'message'=>$connect->error];
+
+            } else {
+                if($answer['answered'] == 'true') {
+                    $count = 1;
+                } else {
+                    $count = 0;
+                }
+
+                $insert['word_id'] = $answer['word_id'];
+                $insert['user_id'] = $uid;
+                $insert['dictionary_id'] = $did;
+                $insert['count'] = $count;
+                $insert['answerd'] = 0;
+
+                $keys = implode('`,`', array_keys($insert));
+                $values = [];
+                foreach ($insert as $k=>$v) {
+                    if(is_int($v) || is_bool($v)) {
+                        $values[] = $v;
+                    } else {
+                        $values[] = "'{$v}'";
+                    }
+                }
+
+                $values = implode(',' , $values);
+                $query = "INSERT INTO user_answers (`{$keys}`) VALUES ({$values})";
+                //echo $query;
+                if(!mysqli_query($connect, $query)) return ['code'=>500, 'message'=>$connect->error];
+
+            }
+        }
+
+        return true;
+
+    }
 
     function get_user_answers($did, $uid) {}
 
-    function user_word_answer_exists($uid, $wid) {}
+    function get_user_word_answers($uid, $wid) {}
+
+    function user_word_answer_exists($uid, $wid) {
+        global $connect;
+
+        if ($stmt = mysqli_prepare($connect, "SELECT * FROM user_answers WHERE word_id = ? AND user_id = ?")) {
+            mysqli_stmt_bind_param($stmt,'ii', $wid, $uid);
+            mysqli_stmt_execute($stmt);
+            $stmt->execute();
+
+            $meta = $stmt->result_metadata();
+            while ($field = $meta->fetch_field())
+            {
+                $params[] = &$row[$field->name];
+            }
+
+            call_user_func_array(array($stmt, 'bind_result'), $params);
+
+            while ($stmt->fetch()) {
+                foreach($row as $key => $val)
+                {
+                    $c[$key] = $val;
+                }
+                $result[] = $c;
+            }
+
+
+        }
+
+        return $result;
+    }
