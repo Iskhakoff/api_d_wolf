@@ -35,10 +35,8 @@
 			if ($result) {
 				$status_code = "HTTP/1.0 200 OK";
 				$status = [
-					    "name" => $name,
-					    "login" => $login,
-					    "email" => $email
-					];
+				    "status"=>"success"
+                ];
 			}
 			else {
 				$status_code = "HTTP/1.0 500 Internal Server Error";

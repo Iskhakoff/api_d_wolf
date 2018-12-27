@@ -36,7 +36,7 @@
 		if ($stmt = mysqli_prepare($connect, "SELECT * FROM users WHERE login = ?")) {
 			mysqli_stmt_bind_param($stmt, "s", $login);
 			mysqli_stmt_execute($stmt);
-			mysqli_stmt_bind_result($stmt, $id, $name, $login_bind, $pass_bind, $email);
+			mysqli_stmt_bind_result($stmt, $id, $name, $login_bind, $pass_bind, $email, $dictionary);
 			mysqli_stmt_fetch($stmt);
 			mysqli_stmt_close($stmt);
 		}
